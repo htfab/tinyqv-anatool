@@ -1,6 +1,6 @@
 ![](../../workflows/gds/badge.svg) ![](../../workflows/docs/badge.svg) ![](../../workflows/test/badge.svg) ![](../../workflows/fpga/badge.svg)
 
-# TinyQV Byte Peripheral Template for Tiny Tapeout
+# Analog Toolkit peripheral for TinyQV
 
 - [Read the documentation for project](docs/info.md)
 

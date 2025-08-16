@@ -12,8 +12,6 @@ Allows building low frequency ADCs, DACs, capacitive sensors etc. using passives
 
 ## Register map
 
-Document the registers that are used to interact with your peripheral
-
 | Address | Name  | Access | Description                                                         |
 |---------|-------|--------|---------------------------------------------------------------------|
 | 0x00    | OUT0  | W      | Output channel 0 duty cycle: 1b sign, 4b exponent, 3b mantissa      |
@@ -28,8 +26,8 @@ Document the registers that are used to interact with your peripheral
 Build one of the test circuits:
 
 - ADC
-  - connect `uo_in[0]` to the wiper of a 10k linear potmeter on a breadboard
-  - add a 100nF capacitor between `uo_in[0]` and `uo_out[1]`
+  - connect `ui_in[0]` to the wiper of a 10k linear potmeter on a breadboard
+  - add a 100nF capacitor between `ui_in[0]` and `uo_out[1]`
   - connect the other contacts of the potmeter to 3.3V and ground respectively
   - set DIV (register 4) to 0x60 (~64Hz clock)
   - set OUT0 (register 0) to 0x80 (1/2 duty cycle)
