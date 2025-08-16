@@ -1,14 +1,9 @@
-/*
- * Copyright (c) 2025 Your Name
- * SPDX-License-Identifier: Apache-2.0
- */
-
 `default_nettype none
 
 // Change the name of this module to something that reflects its functionality and includes your name for uniqueness
 // For example tqvp_yourname_spi for an SPI peripheral.
 // Then edit tt_wrapper.v line 38 and change tqvp_example to your chosen module name.
-module tqvp_example (
+module tqvp_htfab_anatool (
     input         clk,          // Clock - the TinyQV project clock is normally set to 64MHz.
     input         rst_n,        // Reset_n - low to reset.
 
@@ -26,26 +21,75 @@ module tqvp_example (
     output [7:0]  data_out      // Data out from the peripheral, set this in accordance with the supplied address
 );
 
-    // Example: Implement an 8-bit read/write register at address 0
-    reg [7:0] example_data;
+    reg [7:0] step;
+    reg [2:0] channel;
+    reg duty_rst_n;
+
+    wire [7:0] fp_time;
+    wire [7:0] fp_duty;
+
+    fp_counter fp_time_i (
+        .clk,
+        .rst_n,
+        .step,
+        .step_en(1'b1),
+        .value(fp_time)
+    );
+
+    fp_counter fp_duty_i (
+        .clk,
+        .rst_n(rst_n & duty_rst_n),
+        .step,
+        .step_en(ui_in[channel]),
+        .value(fp_duty)
+    );
+
+    reg [7:0] in_duty;
+    reg [7:0] out_duty [2:0];
+
     always @(posedge clk) begin
         if (!rst_n) begin
-            example_data <= 0;
-        end else begin
-            if (address == 4'h0) begin
-                if (data_write) example_data <= data_in;
+            step <= 0;
+            out_duty[0] <= 8'h80;
+            out_duty[1] <= 8'h80;
+            out_duty[2] <= 8'h80;
+            channel <= 0;
+        end else if (data_write) begin
+            if (address == 4) begin
+                step <= data_in;
+            end else if (address == 5) begin
+                channel <= data_in[2:0];
+            end else begin
+                out_duty[address] <= data_in;
             end
         end
     end
 
-    // All output pins must be assigned. If not used, assign to 0.
-    assign uo_out  = ui_in + example_data;  // Example: uo_out is the sum of ui_in and the example register
+    wire roll = fp_time[7];
+    reg last_roll;
 
-    // Address 0 reads the example data register.  
-    // Address 1 reads ui_in
-    // All other addresses read 0.
-    assign data_out = (address == 4'h0) ? example_data :
-                      (address == 4'h1) ? ui_in :
-                      8'h0;    
+    always @(posedge clk) begin
+        if (!rst_n) begin
+            last_roll <= 0;
+            duty_rst_n <= 0;
+        end else begin
+            last_roll <= roll;
+            if (last_roll && !roll) begin
+                in_duty <= fp_duty;
+                duty_rst_n <= 0;
+            end else begin
+                duty_rst_n <= 1;
+            end
+        end
+    end
+
+    wire [2:0] out_bank;
+    assign out_bank[0] = fp_time < out_duty[0];
+    assign out_bank[1] = fp_time < out_duty[1];
+    assign out_bank[2] = fp_time < out_duty[2];
+
+    assign uo_out = {out_bank, !ui_in[4], out_bank, ui_in[0]};
+
+    assign data_out = in_duty;
 
 endmodule

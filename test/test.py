@@ -13,6 +13,36 @@ from tqv import TinyQV
 PERIPHERAL_NUM = 16
 
 @cocotb.test()
+async def test_fp_counter(dut):
+
+    await cocotb.start(Clock(dut.clk, 1, units="ns").start())
+
+    dut.rst_n.value = 0
+    dut.fp_step.value = 112
+    dut.fp_step_en.value = 0
+    await ClockCycles(dut.clk, 1)
+    dut.rst_n.value = 1
+    await ClockCycles(dut.clk, 1)
+    dut.fp_step_en.value = 1
+
+    i = 0
+    last = -1
+    while True:
+        await ClockCycles(dut.clk, 1)
+        current = dut.fp_value.value
+        if current != last:
+            if current == 0:
+                if last != -1:
+                    break
+            assert current == last + 1
+            last = current
+        if i % 16384 == 0:
+            print(current, int(current), i)
+        i += 1
+
+    assert current == 0
+
+@cocotb.test()
 async def test_project(dut):
     dut._log.info("Start")
 
@@ -33,19 +63,35 @@ async def test_project(dut):
     dut._log.info("Test project behavior")
 
     # Test register write and read back
-    await tqv.write_reg(0, 20)
-    assert await tqv.read_reg(0) == 20
+    await tqv.write_reg(0, 112)
+    await tqv.write_reg(1, 128)
+    await tqv.write_reg(2, 144)
+    await tqv.write_reg(4, 240)
+    await tqv.write_reg(5, 1)
 
-    # Set an input value, in the example this will be added to the register value
-    dut.ui_in.value = 30
+    last = dut.uo_out.value
+    count_rep = 1
+    count_c1 = 0
+    count_c2 = 0
+    count_c3 = 0
+    for i in range(16384):
+        dut.ui_in[1].value = dut.uo_out[1].value
+        await ClockCycles(dut.clk, 1)
+        current = dut.uo_out.value
+        count_c1 += dut.uo_out[1].value
+        count_c2 += dut.uo_out[2].value
+        count_c3 += dut.uo_out[3].value
+        if current == last:
+            count_rep += 1
+        else:
+            print(last, count_rep)
+            last = current
+            count_rep = 1
 
-    # Wait for two clock cycles to see the output values, because ui_in is synchronized over two clocks,
-    # and a further clock is required for the output to propagate.
-    await ClockCycles(dut.clk, 3)
+    print(last, count_rep)
 
-    # The following assertion is just an example of how to check the output values.
-    # Change it to match the actual expected output of your module:
-    assert dut.uo_out.value == 50
+    assert count_c1 == 2048
+    assert count_c2 == 8192
+    assert count_c3 == 16384 - 2048
+    assert await tqv.read_reg(3) == 112
 
-    # Keep testing the module by changing the input values, waiting for
-    # one or more clock cycles, and asserting the expected output values.

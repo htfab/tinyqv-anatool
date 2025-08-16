@@ -27,6 +27,10 @@ module tb ();
   wire VGND = 1'b0;
 `endif
 
+  reg [7:0] fp_step;
+  reg fp_step_en;
+  wire [7:0] fp_value;
+
   tt_um_tqv_peripheral_harness test_harness (
 
       // Include power ports for the Gate Level test:
@@ -43,6 +47,14 @@ module tb ();
       .ena    (ena),      // enable - goes high when design is selected
       .clk    (clk),      // clock
       .rst_n  (rst_n)     // not reset
+  );
+
+  fp_counter counter (
+      .clk     (clk),
+      .rst_n   (rst_n),
+      .step    (fp_step),
+      .step_en (fp_step_en),
+      .value   (fp_value)
   );
 
 endmodule
