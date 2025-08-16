@@ -1,4 +1,4 @@
-import machine, struct
+import machine, struct, time
 
 cs = machine.Pin(17, machine.Pin.OUT)
 sck = machine.Pin(18, machine.Pin.OUT)
@@ -30,21 +30,18 @@ else:
 
 def write_reg(address, value):
     cs.value(0)
-    spi.write(b'\xC0\x00\x00' + struct.pack('>B', address) + struct.pack('>L', value))
+    spi.write(struct.pack('>B', 128 + address) + struct.pack('>B', value))
     cs.value(1)
 
 def read_reg(address):
     cs.value(0)
-    spi.write(b'\x40\x00\x00' + struct.pack('>B', address))
-    res, = struct.unpack('>L', spi.read(4))
+    spi.write(struct.pack('>B', address))
+    res, = struct.unpack('>B', spi.read(1))
     cs.value(1)
     return res
 
-write_reg(0, 0x01234567)
-write_reg(4, 0x12345678)
-print(hex(read_reg(0)))
-print(hex(read_reg(4)))
-print(hex(read_reg(8)))
-print(hex(read_reg(12)))
-
-for i in range(16): write_reg(i*4, 0x11111111*i)
+def adc_test():
+    write_reg(4, 96)
+    while True:
+        print(read_reg(3))
+        time.sleep(0.1)

@@ -60,7 +60,7 @@ module tqvp_htfab_anatool (
             end else if (address == 5) begin
                 channel <= data_in[2:0];
             end else begin
-                out_duty[address[1:0]] <= data_in;
+                out_duty[2'(address)] <= data_in;
             end
         end
     end

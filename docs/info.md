@@ -1,17 +1,4 @@
-<!---
-
-This file is used to generate your project datasheet. Please fill in the information below and delete any unused
-sections.
-
-The peripheral index is the number TinyQV will use to select your peripheral.  You will pick a free
-slot when raising the pull request against the main TinyQV repository, and can fill this in then.  You
-also need to set this value as the PERIPHERAL_NUM in your test script.
-
-You can also include images in this folder and reference them in the markdown. Each image must be less than
-512 kb in size, and the combined size of all images must be less than 1 MB.
--->
-
-# Your project title
+# Analog toolkit peripheral
 
 Author: htfab
 
@@ -38,11 +25,32 @@ Document the registers that are used to interact with your peripheral
 
 ## How to test
 
-Explain how to use your project
+Build one of the test circuits:
+
+- ADC
+  - connect `uo_in[0]` to the wiper of a 10k linear potmeter on a breadboard
+  - add a 100nF capacitor between `uo_in[0]` and `uo_out[1]`
+  - connect the other contacts of the potmeter to 3.3V and ground respectively
+  - set DIV (register 4) to 0x60 (~64Hz clock)
+  - set OUT0 (register 0) to 0x80 (1/2 duty cycle)
+  - set CH (register 5) to 0 (set input to `ui_in[0]`)
+  - read IN (register 3) for ADC values
+  - it won't be perfectly linear but sweeping along the middle 75% of the potmeter's path
+    should cover a reasonable range of values, say, 64 to 192
+
+- DAC
+  - ...
+
+- Capacitive sensor
+  - ...
+
+- LED dimmer
+  - ...
 
 ## External hardware
 
 Depending on the circuit you want to build it might be useful to have a few
+
 - ceramic capacitors (100nF)
 - resistors (100Ω, 10kΩ, 1MΩ)
 - potmeters (10kΩ linear)
