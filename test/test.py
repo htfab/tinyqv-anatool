@@ -15,7 +15,7 @@ from tqv import TinyQV
 PERIPHERAL_NUM = 26
 
 gate_level = 'GATES' in os.environ
-integration = 'USER_PERIPHERALS' in os.environ
+integration = 'user_peripherals' in os.environ['MODULE']
 
 @cocotb.test(skip=(gate_level or integration))
 async def test_fp_counter(dut):
