@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: © 2025 Tiny Tapeout
 # SPDX-License-Identifier: Apache-2.0
 
+import os
+
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles
@@ -12,7 +14,7 @@ from tqv import TinyQV
 # The peripheral number is not used by the test harness.
 PERIPHERAL_NUM = 16
 
-@cocotb.test()
+@cocotb.test(skip=(os.environ['SIM_BUILD'] == 'sim_build/gl'))
 async def test_fp_counter(dut):
 
     await cocotb.start(Clock(dut.clk, 1, units="ns").start())
@@ -94,4 +96,3 @@ async def test_project(dut):
     assert count_c2 == 8192
     assert count_c3 == 16384 - 2048
     assert await tqv.read_reg(3) == 112
-

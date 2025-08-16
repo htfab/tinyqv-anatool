@@ -49,6 +49,7 @@ module tb ();
       .rst_n  (rst_n)     // not reset
   );
 
+`ifndef GL_TEST
   fp_counter counter (
       .clk     (clk),
       .rst_n   (rst_n),
@@ -56,5 +57,6 @@ module tb ();
       .step_en (fp_step_en),
       .value   (fp_value)
   );
+`endif
 
 endmodule

@@ -15,7 +15,7 @@ always @(posedge clk) begin
     if (!rst_n) begin
         counter <= 0;
     end else if(step_en) begin
-        counter <= counter + inc;
+        counter <= counter + {10'b0, inc};
     end
 end
 
