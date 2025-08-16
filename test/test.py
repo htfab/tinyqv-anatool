@@ -12,9 +12,12 @@ from tqv import TinyQV
 # When submitting your design, change this to 16 + the peripheral number
 # in peripherals.v.  e.g. if your design is i_user_simple00, set this to 16.
 # The peripheral number is not used by the test harness.
-PERIPHERAL_NUM = 16
+PERIPHERAL_NUM = 26
 
-@cocotb.test(skip=(os.environ['SIM_BUILD'] == 'sim_build/gl'))
+gate_level = 'GATES' in os.environ
+integration = 'USER_PERIPHERALS' in os.environ
+
+@cocotb.test(skip=(gate_level or integration))
 async def test_fp_counter(dut):
 
     await cocotb.start(Clock(dut.clk, 1, units="ns").start())
